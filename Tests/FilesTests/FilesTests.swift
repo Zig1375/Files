@@ -273,18 +273,6 @@ class FilesTests: XCTestCase {
             XCTAssertEqual(folder.files.count, 1)
         }
     }
-
-    func testMovingFolders() {
-        performTest {
-            let a = try folder.createSubfolder(named: "A")
-            let b = try a.createSubfolder(named: "B")
-            _ = try b.createSubfolder(named: "C")
-
-            try b.move(to: folder)
-            XCTAssertTrue(folder.containsSubfolder(named: "B"))
-            XCTAssertTrue(b.containsSubfolder(named: "C"))
-        }
-    }
     
     func testCopyingFolders() {
         performTest {
@@ -474,29 +462,6 @@ class FilesTests: XCTestCase {
             try XCTAssertEqual(file.read(), "New content".data(using: .utf8))
         }
     }
-
-    func testAppendingDataToFile() {
-        performTest {
-            let file = try folder.createFile(named: "file")
-            let data = "Old content\n".data(using: .utf8)!
-            try file.write(data: data)
-
-            let newData = "I'm the appended content 💯\n".data(using: .utf8)!
-            try file.append(data: newData)
-            try XCTAssertEqual(file.read(), "Old content\nI'm the appended content 💯\n".data(using: .utf8))
-        }
-    }
-
-    func testAppendingStringToFile() {
-        performTest {
-            let file = try folder.createFile(named: "file")
-            try file.write(string: "Old content\n")
-
-            let newString = "I'm the appended content 💯\n"
-            try file.append(string: newString)
-            try XCTAssertEqual(file.read(), "Old content\nI'm the appended content 💯\n".data(using: .utf8))
-        }
-    }
     
     func testFileDescription() {
         performTest {
@@ -509,22 +474,6 @@ class FilesTests: XCTestCase {
         performTest {
             let subfolder = try folder.createSubfolder(named: "folder")
             XCTAssertEqual(subfolder.description, "Folder(name: folder, path: \(folder.path)folder/)")
-        }
-    }
-
-    func testFilesDescription() {
-        performTest {
-            let fileA = try folder.createFile(named: "fileA")
-            let fileB = try folder.createFile(named: "fileB")
-            XCTAssertEqual(folder.files.description, "\(fileA.description)\n\(fileB.description)")
-        }
-    }
-
-    func testSubfoldersDescription() {
-        performTest {
-            let folderA = try folder.createSubfolder(named: "folderA")
-            let folderB = try folder.createSubfolder(named: "folderB")
-            XCTAssertEqual(folder.subfolders.description, "\(folderA.description)\n\(folderB.description)")
         }
     }
 
@@ -756,12 +705,8 @@ class FilesTests: XCTestCase {
         ("testDeletingNonExistingFileThrows", testDeletingNonExistingFileThrows),
         ("testWritingDataToFile", testWritingDataToFile),
         ("testWritingStringToFile", testWritingStringToFile),
-        ("testAppendingDataToFile", testAppendingDataToFile),
-        ("testAppendingStringToFile", testAppendingStringToFile),
         ("testFileDescription", testFileDescription),
         ("testFolderDescription", testFolderDescription),
-        ("testFilesDescription", testFilesDescription),
-        ("testSubfoldersDescription", testSubfoldersDescription),
         ("testMovingFolderContents", testMovingFolderContents),
         ("testMovingFolderHiddenContents", testMovingFolderHiddenContents),
         ("testAccessingHomeFolder", testAccessingHomeFolder),

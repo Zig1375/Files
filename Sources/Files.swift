@@ -287,12 +287,8 @@ public class FileSystem {
          *  - throws: `FileSystem.Item.OperationError.moveFailed` if the item couldn't be moved
          */
         public func move(to newParent: Folder) throws {
-            var newPath = newParent.path + name
-
-            if kind == .folder && !newPath.hasSuffix("/") {
-                newPath += "/"
-            }
-
+            let newPath = newParent.path + name
+            
             do {
                 try fileManager.moveItem(atPath: path, toPath: newPath)
                 path = newPath
@@ -527,40 +523,6 @@ public final class File: FileSystem.Item, FileSystemIterable {
         }
         
         try write(data: data)
-    }
-
-    /**
-     *  Append data to the end of the file
-     *
-     *  - parameter data: The data to append to the file
-     *
-     *  - throws: `File.Error.writeFailed` if the file couldn't be written to
-     */
-    public func append(data: Data) throws {
-        do {
-            let handle = try FileHandle(forWritingTo: URL(fileURLWithPath: path))
-            handle.seekToEndOfFile()
-            handle.write(data)
-            handle.closeFile()
-        } catch {
-            throw Error.writeFailed
-        }
-    }
-
-    /**
-     *  Append a string to the end of the file
-     *
-     *  - parameter string: The string to append to the file
-     *  - parameter encoding: Optionally give which encoding that the string should be encoded in (defaults to UTF-8)
-     *
-     *  - throws: `File.Error.writeFailed` if the string couldn't be encoded, or written to the file
-     */
-    public func append(string: String, encoding: String.Encoding = .utf8) throws {
-        guard let data = string.data(using: encoding) else {
-            throw Error.writeFailed
-        }
-
-        try append(data: data)
     }
     
     /**
@@ -884,7 +846,7 @@ public protocol FileSystemIterable {
  *  You don't create instances of this class yourself. Instead, you can access various sequences on a `Folder`, for example
  *  containing its files and subfolders. The sequence is lazily evaluated when you perform operations on it.
  */
-public class FileSystemSequence<T: FileSystem.Item>: Sequence, CustomStringConvertible where T: FileSystemIterable {
+public class FileSystemSequence<T: FileSystem.Item>: Sequence where T: FileSystemIterable {
     /// The number of items contained in this sequence. Accessing this causes the sequence to be evaluated.
     public var count: Int {
         var count = 0
@@ -929,10 +891,6 @@ public class FileSystemSequence<T: FileSystem.Item>: Sequence, CustomStringConve
     /// Move all the items in this sequence to a new folder. See `FileSystem.Item.move(to:)` for more info.
     public func move(to newParent: Folder) throws {
         try forEach { try $0.move(to: newParent) }
-    }
-
-    public var description: String {
-        return map { $0.description }.joined(separator: "\n")
     }
 }
 
@@ -1111,12 +1069,13 @@ private extension ProcessInfo {
         return environment["HOME"]!
     }
 }
-
-#if os(Linux) && !(swift(>=4.1))
+/*
+#if os(Linux)
 private extension ObjCBool {
     var boolValue: Bool { return Bool(self) }
 }
 #endif
+*/
 
 #if !os(Linux)
 extension FileSystem {
